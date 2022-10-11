@@ -1,0 +1,13 @@
+<template>
+    <lightning-card  variant="Narrow" if:true={unit} title={unit.Name} icon-name="standard:account">
+        <lightning-button label="view Unit" slot="actions" onclick={viewUnit} data-prop={unit.Id} ></lightning-button>
+        <lightning-layout multiple-rows class="slds-p-right_small">
+            <p class="slds-p-horizontal_small">Unit Score: {unit.Puntos__c} points</p>
+            <p class="slds-p-horizontal_small">Unit Estimated Time: {unit.Tiempo__c} minutes</p>
+            <lightning-icon if:true={Testunit} icon-name="utility:success" variant="Success" size="small"></lightning-icon>
+        </lightning-layout><br>
+        <p class="slds-p-horizontal_small">{unit.Contenido__c}</p>
+   
+    </lightning-card>
+
+</template>

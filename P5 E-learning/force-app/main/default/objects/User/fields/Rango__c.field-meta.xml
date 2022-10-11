@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Rango__c</fullName>
+    <externalId>false</externalId>
+    <formula>IF( PuntosTotales__c = 0, &quot;SCOUT&quot;,IF(PuntosTotales__c&lt;= 100,&quot;HIKER&quot;,IF(PuntosTotales__c &lt;= 200, &quot;EXPLORER&quot;,IF(PuntosTotales__c &lt;= 300, &quot;ADVENTURER&quot;, IF( PuntosTotales__c &lt;= 400, &quot;MOUNTAINEER&quot;, IF(PuntosTotales__c &lt;= 500, &quot;EXPEDITIONER&quot;,  IF(PuntosTotales__c &lt;= 600,&quot;RANGER&quot;, &quot;SUPERSTAR&quot;) )  )  ) ) ) )</formula>
+    <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
+    <label>Rango</label>
+    <required>false</required>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

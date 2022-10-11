@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Antes_de_Activar_Modulo</fullName>
+    <active>true</active>
+    <description>Verificamos que Skill y Roles NO tienen algo</description>
+    <errorConditionFormula>If(Activado__c , If(TEXT( Skills__c )=&quot;&quot; ||  ISBLANK( Roles__c ),true,false),false)</errorConditionFormula>
+    <errorMessage>Skills y Roles deben tener un valor asignado para poder Activar el modulo</errorMessage>
+</ValidationRule>

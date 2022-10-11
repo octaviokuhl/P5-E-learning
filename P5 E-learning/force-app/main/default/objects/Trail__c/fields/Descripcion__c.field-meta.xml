@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Descripcion__c</fullName>
+    <description>Simple description of what you can learn to do with this trail</description>
+    <externalId>false</externalId>
+    <inlineHelpText>Simple description of what you can learn to do with this trail</inlineHelpText>
+    <label>Descripcion</label>
+    <length>255</length>
+    <required>true</required>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>
