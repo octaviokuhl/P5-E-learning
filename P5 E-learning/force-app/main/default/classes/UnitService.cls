@@ -1,41 +1,47 @@
 public with sharing class UnitService {
-  public static Boolean registroRespuesta(Id unidadId, String janswer) {
-  //Janswer va a venir como key:pair value y es tipo boolean el metodo porque debe devolver algo que sea correcto o falso
 
+  @AuraEnabled (cacheable=false)
+  public static Boolean registroRespuesta(Id unitId, String jsonAnswer) {
+  //jsonAnswer va a venir como key:pair value y es tipo boolean el metodo porque debe devolver algo que sea correcto o falso
+  
     Savepoint sp = Database.setSavepoint(); // es un punto de salvado de lo que tengo antes de iniciar todo
     Boolean verify = false; //respuesta que el metodo arrojara, seteo en false para que si todo sale bien, pase a true
 
       try{//Arranco por lo simple, crear una UnidadUser, al ir creciendo y ver que puedo tener errores se pone el try
-
+        
           //Quiero validar las preguntas que entran al Json. Busco cuales preguntas hay en la unidad y lo hago en un subquery
           // "contenido__c" es realmente mi pregunta, recordar que Name es malisimo como esta usandose como un numero o similar.
           // para los intentos, subquery en UnidadUser, que me ordene por los intentos registrados de mayor a menor y el primero, de esta forma traigo el que mas numero de intentos tiene de ese registro... 0, 1 ,2, 3, 4 y puedo usarlo para los puntos
 
-           Unidad__c unidad= [SELECT Modulo__c, (SELECT Id, Intento__c FROM UnidadesUsers__r WHERE ModuloUser__r.User__c =:UserInfo.getUserId() ORDER BY Intento__c DESC LIMIT 1), (SELECT Id,Contenido__c FROM Preguntas__r ) FROM Unidad__c WHERE ID =:unidadId];
+           Unidad__c unidad= [SELECT Modulo__c, (SELECT Id, Intento__c FROM UnidadesUsers__r WHERE ModuloUser__r.User__c =:UserInfo.getUserId() ORDER BY Intento__c DESC LIMIT 1), (SELECT Id,Contenido__c FROM Preguntas__r ) FROM Unidad__c WHERE ID =:unitId];
           // donde el ID sea el que entra por paramtero.
-
+          
           //Query para saber si la UnidadUser ya existe o si debo crear una nueva
-          ModuloUser__c  mu = [SELECT id FROM ModuloUser__c WHERE Modulo__c=:unidad.Modulo__c AND User__c =: UserInfo.getUserId() AND Status__c ='In Progress'];
+          
+          ModuloUser__c  mu ;
+          try{ //este try lo pusmos porque el If null que teniamos para verificar que si el mu esta vacio lo cree NO funcionaba y solucionamos con esto
+           mu = [SELECT id FROM ModuloUser__c WHERE Modulo__c=:unidad.Modulo__c AND User__c =: UserInfo.getUserId() AND Status__c ='In Progress'];
+          
+          } catch (Exception e){
 
-              If(mu== null){
-              //Creo ModuloUser - mu modulo user como autonumber,
-              mu = new ModuloUser__c(User__c = UserInfo.getUserId(), Modulo__c= unidad.Modulo__c, Status__c='In Progress');
-              insert mu;
-              // de la query "unidad" el campo Modulo__c. Si bien Status en declarativo lo puse como campo predeterminado en "In progress" me conviene ponerlo aca porque si alguien magicamente lo cambia me va a romper por todos lados, aca al crear si o si se respete la logica diseñada.
-             }
+           //creacion de module response
+           mu = new ModuloUser__c(User__c = UserInfo.getUserId(), Modulo__c = unidad.Modulo__c, Status__c = 'In Progress');
+           system.debug('ENTRO AL module resp');
+          insert mu;
+          }
 
           // creo un resgitro unidadusuario UU= unidad usuario como el autonumber asi sigo la misma logica. Un registro UU tiene dos cosas requeridas son las lookups que tiene, Unidad y ModuloUser.
-          UnidadUser__c  uu = new UnidadUser__c(Unidad__c = unidadId, ModuloUser__c = mu.Id, EstadoUnidad__c = 'Draft');
-
+          UnidadUser__c  uu = new UnidadUser__c(Unidad__c = unitId, ModuloUser__c = mu.Id, EstadoUnidad__c = 'Draft', User__c=UserInfo.getUserId() );
+          
           uu.Intento__c = !unidad.UnidadesUsers__r.isEmpty() ? unidad.UnidadesUsers__r[0].Intento__c + 1: 1;
          //UnidadesUsers__r usa la relacion hijo para hacer referencia a todo lo que me trae  esa lista (si le hago un query en consola me trae la lista, sin filtrar nada esa subquery
-
+          
           insert uu;
          // con estos datos ya creo la UU sin problema y la inserto, tener en cuenta que mu.Id lo tuve cuando inserte mu no antes.
-
+          system.debug('HOLA');
         //RespuestaResponse va a ser una lista de seleccion de respuestas, como un trail real... es decir selecciono respuesta A primer pregunta y B de la segunda, de ahi Submit entonces eso es una lista de RespuestaResponse. Pero yo recibo un Json que es un Mapa de IdQuestion: IdOpcion entonces tengo que primero pasarlo a un formato Mapa normal (castearlo) y de ahi recorrerlo, recordar que siempre que recorro un mapa lo hago buscando la key primero y lo uso para tener un value. ketset me devuelve un set de keys
 
-         Map<Id,Id> maparespuestas = (Map<Id,Id>)JSON.deserializeStrict(janswer, Map<Id,Id>.class);
+         Map<Id,Id> maparespuestas = (Map<Id,Id>)JSON.deserializeStrict(jsonAnswer, Map<Id,Id>.class);
         List<RespuestaResponse__c> respuestaslist= new List<RespuestaResponse__c>(); //lista en donde voy a ir agregando mis resultados
 
          //Voy a ir a ver si lo que se respondio en el mapa (key) esta entre las preguntas de la unidad.Respuestas__r

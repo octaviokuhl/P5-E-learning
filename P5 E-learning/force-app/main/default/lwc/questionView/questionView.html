@@ -1,9 +1,0 @@
-<template>
-    <h1>
-        {pregunta.Name}
-        {pregunta.Contenido__c}
-    </h1>
-    <template if:true={pregunta.Respuestas__r} for:each={pregunta.Respuestas__r} for:item="answer">
-         <c-answer-view  key ={answer.Id}  answer={answer}></c-answer-view>
-    </template>
-</template>
